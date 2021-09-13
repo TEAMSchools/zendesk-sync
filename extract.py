@@ -9,6 +9,8 @@ from dotenv import load_dotenv
 from google.cloud import storage
 from zenpy import Zenpy
 
+from datarobot.utilities import email
+
 load_dotenv()
 
 ZENDESK_EMAIL = os.getenv("ZENDESK_EMAIL")
@@ -85,3 +87,6 @@ if __name__ == "__main__":
     except Exception as xc:
         print(xc)
         print(traceback.format_exc())
+        email_subject = "Zendesk Extract Error"
+        email_body = f"{xc}\n\n{traceback.format_exc()}"
+        email.send_email(subject=email_subject, body=email_body)
