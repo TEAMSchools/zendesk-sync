@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "zendesk-sync"
+version = "0.1.0"
+description = ""
+authors = ["Charlie Bini <5003326+cbini@users.noreply.github.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+python-dotenv = "^0.19.1"
+google-cloud-storage = "^1.42.3"
+zenpy = "^2.0.24"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+black = "^21.9b0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
