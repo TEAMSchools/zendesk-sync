@@ -17,8 +17,27 @@ ZENDESK_EMAIL = os.getenv("ZENDESK_EMAIL")
 ZENDESK_TOKEN = os.getenv("ZENDESK_TOKEN")
 ZENDESK_SUBDOMAIN = os.getenv("ZENDESK_SUBDOMAIN")
 GCS_BUCKET_NAME = os.getenv("GCS_BUCKET_NAME")
+GCS_SCHEMA_NAME = os.getenv("GCS_SCHEMA_NAME")
 
 PROJECT_PATH = PROJECT_PATH = pathlib.Path(__file__).absolute().parent
+
+
+def to_json(data, file_name):
+    file_path = PROJECT_PATH / "data" / file_name
+    if not file_path.parent.exists():
+        file_path.parent.mkdir(parents=True)
+
+    with gzip.open(file_path, "wt", encoding="utf-8") as f:
+        json.dump(data, f)
+
+    return file_path
+
+
+def upload_to_gcs(bucket, schema, file_path):
+    parts = file_path.parts
+    blob = bucket.blob(f"{schema}/{'/'.join(parts[parts.index('data') + 1:])}")
+    blob.upload_from_filename(file_path)
+    return blob
 
 
 def main():
@@ -34,10 +53,11 @@ def main():
     gcs_storage_client = storage.Client()
     gcs_bucket = gcs_storage_client.bucket(GCS_BUCKET_NAME)
 
-    data_path = PROJECT_PATH / "data" / "ticket_metrics"
-    if not data_path.exists():
-        data_path.mkdir(parents=True)
-        print(f"Created {'/'.join(data_path.parts[-3:])}...")
+    endpoint = "ticket_metrics"
+    file_dir = PROJECT_PATH / "data" / endpoint
+    if not file_dir.exists():
+        file_dir.mkdir(parents=True)
+        print(f"Created {file_dir}...")
 
         # archived ticket metrics
         print("Downloading metrics for archived tickets...")
@@ -48,16 +68,14 @@ def main():
             zenpy_client.tickets.metrics(ati).to_dict() for ati in archive_ticket_ids
         ]
 
-        archive_data_filepath = data_path / "archive.json.gz"
-        with gzip.open(archive_data_filepath, "wt", encoding="utf-8") as f:
-            json.dump(archive_data, f)
-        print(f"\tSaved to {archive_data_filepath}!")
+        # save file
+        file_name = f"{endpoint}/archive.json.gz"
+        archive_file_path = to_json(archive_data, file_name)
+        print(f"\tSaved to {archive_file_path}!")
 
         # push to GCS
-        destination_blob_name = "zendesk/" + "/".join(archive_data_filepath.parts[-2:])
-        blob = gcs_bucket.blob(destination_blob_name)
-        blob.upload_from_filename(archive_data_filepath)
-        print(f"\tUploaded to {destination_blob_name}!")
+        blob = upload_to_gcs(gcs_bucket, GCS_SCHEMA_NAME, archive_file_path)
+        print(f"\tUploaded to {blob.public_url}!")
 
     # current data at ticket_metrics endpoint
     print("Downloading all current ticket metrics...")
@@ -69,16 +87,13 @@ def main():
     ]
 
     # save file
-    data_filepath = data_path / f"{query_date.isoformat()}.json.gz"
-    with gzip.open(data_filepath, "wt", encoding="utf-8") as f:
-        json.dump(filtered_data, f)
-    print(f"\tSaved to {data_filepath}!")
+    file_name = f"{endpoint}/{str(query_date.timestamp()).replace('.', '_')}.json.gz"
+    file_path = to_json(filtered_data, file_name)
+    print(f"\tSaved to {file_path}!")
 
     # push to GCS
-    destination_blob_name = "zendesk/" + "/".join(data_filepath.parts[-2:])
-    blob = gcs_bucket.blob(destination_blob_name)
-    blob.upload_from_filename(data_filepath)
-    print(f"\tUploaded to {destination_blob_name}!")
+    blob = upload_to_gcs(gcs_bucket, GCS_SCHEMA_NAME, file_path)
+    print(f"\tUploaded to {blob.public_url}!")
 
 
 if __name__ == "__main__":
