@@ -5,13 +5,10 @@ import pathlib
 import traceback
 from datetime import datetime, timedelta, timezone
 
-from dotenv import load_dotenv
 from google.cloud import storage
 from zenpy import Zenpy
 
 from datarobot.utilities import email
-
-load_dotenv()
 
 ZENDESK_EMAIL = os.getenv("ZENDESK_EMAIL")
 ZENDESK_TOKEN = os.getenv("ZENDESK_TOKEN")

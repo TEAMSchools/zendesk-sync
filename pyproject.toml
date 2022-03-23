@@ -1,19 +1,34 @@
-[tool.poetry]
-name = "zendesk-sync"
-version = "0.1.0"
+[project]
+name = ""
+version = ""
 description = ""
-authors = ["Charlie Bini <5003326+cbini@users.noreply.github.com>"]
+authors = [
+    {name = "Charlie Bini", email = "5003326+cbini@users.noreply.github.com"},
+]
+license-expression = "MIT"
+dependencies = [
+    "google-cloud-storage>=2.2.1",
+    "zenpy>=2.0.24"]
+requires-python = ">=3.9"
 
-[tool.poetry.dependencies]
-python = "^3.9"
-python-dotenv = "^0.19.1"
-google-cloud-storage = "^1.42.3"
-zenpy = "^2.0.24"
+[project.urls]
+Homepage = ""
 
-[tool.poetry.dev-dependencies]
-pytest = "^5.2"
-black = "^21.9b0"
+[project.optional-dependencies]
+[tool]
+[tool.pdm]
+[tool.pdm.dev-dependencies]
+dev = [
+    "black>=22.1.0",
+    "pytest>=7.1.0",
+    "flake8>=4.0.1",
+]
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["pdm-pep517>=0.12.0"]
+build-backend = "pdm.pep517.api"
+
+[tool.pdm.scripts]
+_.env_file = ".env"
+extract.cmd = "python zendesk_sync/extract.py"
+extract.site_packages = true
