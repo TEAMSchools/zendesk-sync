@@ -10,17 +10,11 @@ from zenpy import Zenpy
 
 from datarobot.utilities import email
 
-ZENDESK_EMAIL = os.getenv("ZENDESK_EMAIL")
-ZENDESK_TOKEN = os.getenv("ZENDESK_TOKEN")
-ZENDESK_SUBDOMAIN = os.getenv("ZENDESK_SUBDOMAIN")
-GCS_BUCKET_NAME = os.getenv("GCS_BUCKET_NAME")
-GCS_SCHEMA_NAME = os.getenv("GCS_SCHEMA_NAME")
-
-PROJECT_PATH = PROJECT_PATH = pathlib.Path(__file__).absolute().parent
+SCRIPT_DIR = pathlib.Path(__file__).absolute().parent
 
 
 def to_json(data, file_name):
-    file_path = PROJECT_PATH / "data" / file_name
+    file_path = SCRIPT_DIR / "data" / file_name
     if not file_path.parent.exists():
         file_path.parent.mkdir(parents=True)
 
@@ -44,14 +38,16 @@ def main():
     query_date = today - timedelta(days=3)
 
     zenpy_client = Zenpy(
-        email=ZENDESK_EMAIL, token=ZENDESK_TOKEN, subdomain=ZENDESK_SUBDOMAIN
+        email=os.getenv("ZENDESK_EMAIL"),
+        token=os.getenv("ZENDESK_TOKEN"),
+        subdomain=os.getenv("ZENDESK_SUBDOMAIN"),
     )
 
     gcs_storage_client = storage.Client()
-    gcs_bucket = gcs_storage_client.bucket(GCS_BUCKET_NAME)
+    gcs_bucket = gcs_storage_client.bucket(os.getenv("GCS_BUCKET_NAME"))
 
     endpoint = "ticket_metrics"
-    file_dir = PROJECT_PATH / "data" / endpoint
+    file_dir = SCRIPT_DIR / "data" / endpoint
     if not file_dir.exists():
         file_dir.mkdir(parents=True)
         print(f"Created {file_dir}...")
@@ -71,7 +67,7 @@ def main():
         print(f"\tSaved to {archive_file_path}!")
 
         # push to GCS
-        blob = upload_to_gcs(gcs_bucket, GCS_SCHEMA_NAME, archive_file_path)
+        blob = upload_to_gcs(gcs_bucket, "zendesk", archive_file_path)
         print(f"\tUploaded to {blob.public_url}!")
 
     # current data at ticket_metrics endpoint
@@ -89,7 +85,7 @@ def main():
     print(f"\tSaved to {file_path}!")
 
     # push to GCS
-    blob = upload_to_gcs(gcs_bucket, GCS_SCHEMA_NAME, file_path)
+    blob = upload_to_gcs(gcs_bucket, "zendesk", file_path)
     print(f"\tUploaded to {blob.public_url}!")
 
 

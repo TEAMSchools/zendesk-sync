@@ -3,12 +3,10 @@ name = ""
 version = ""
 description = ""
 authors = [
-    {name = "Charlie Bini", email = "5003326+cbini@users.noreply.github.com"},
+  { name = "Charlie Bini", email = "5003326+cbini@users.noreply.github.com" },
 ]
 license-expression = "MIT"
-dependencies = [
-    "google-cloud-storage>=2.2.1",
-    "zenpy>=2.0.24"]
+dependencies = ["google-cloud-storage>=2.2.1", "zenpy>=2.0.24"]
 requires-python = ">=3.9"
 
 [project.urls]
@@ -18,11 +16,7 @@ Homepage = ""
 [tool]
 [tool.pdm]
 [tool.pdm.dev-dependencies]
-dev = [
-    "black>=22.1.0",
-    "pytest>=7.1.0",
-    "flake8>=4.0.1",
-]
+dev = []
 
 [build-system]
 requires = ["pdm-pep517>=0.12.0"]
@@ -30,5 +24,5 @@ build-backend = "pdm.pep517.api"
 
 [tool.pdm.scripts]
 _.env_file = ".env"
-extract.cmd = "python zendesk_sync/extract.py"
-extract.site_packages = true
+extract = { call = "zendesk_sync.extract:main" }
+post_lock = { shell = "pdm export -f requirements -o requirements.txt" }
