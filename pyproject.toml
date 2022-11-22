@@ -6,8 +6,13 @@ authors = [
   { name = "Charlie Bini", email = "5003326+cbini@users.noreply.github.com" },
 ]
 license-expression = "MIT"
-dependencies = ["google-cloud-storage>=2.2.1", "zenpy>=2.0.24"]
+dependencies = [
+    "google-cloud-storage>=2.2.1",
+    "zenpy>=2.0.24",
+    "datarobot @ file:///${PROJECT_ROOT}/../datarobot",
+]
 requires-python = ">=3.9"
+dynamic = ["dependencies"]
 
 [project.urls]
 Homepage = ""
@@ -24,5 +29,5 @@ build-backend = "pdm.pep517.api"
 
 [tool.pdm.scripts]
 _.env_file = ".env"
-extract = { call = "zendesk_sync.extract:main", site_packages = true }
+extract = { call = "zendesk_sync.extract:main" }
 post_lock = { shell = "pdm export -f requirements -o requirements.txt" }
